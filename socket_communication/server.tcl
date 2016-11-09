@@ -5,20 +5,15 @@ namespace eval ::server::help {}
 namespace eval ::server::greet {}
 namespace eval ::server::handle {}
 
-################################################################################################################################################################
-# SETUP #########################################################################################################################################################
-################################################################################################################################################################
-
+# Setup #
 proc ::server::global {} {
 	set ::clients {}
 }
 
-################################################################################################################################################################
-# Handle #########################################################################################################################################################
-################################################################################################################################################################
-
-
-## ::server::handle::Client chan as channelword
+# Handle #
+#//////////////////////////////////////////////////////////////////////
+#
+# ::server::handle::Client chan as channelword
 #
 # recieve a message in a particular channel. Evaluate it, and forward it onto
 # the correct recipient.
@@ -26,6 +21,7 @@ proc ::server::global {} {
 # exmaple: {{from 1.1 to s.1 message 6 when 1458228695512}}
 # sends to s.1: {from 1.1 to s.1 message 6 when 1458228695512}
 #
+#//////////////////////////////////////////////////////////////////////
 proc ::server::handle::client chan {
   set msgs [gets $chan]
 
@@ -37,11 +33,11 @@ proc ::server::handle::client chan {
 	}
 }
 
-
-## sterilizeList msg as list
+#//////////////////////////////////////////////////////////////////////
+# sterilizeList msg as list
 #
 # extract lists so that we can route them
-#
+#//////////////////////////////////////////////////////////////////////
 proc ::server::help::sterilizeList msg {
 	set ret ""
 	if {[llength $msg] == 1} {
@@ -56,10 +52,11 @@ proc ::server::help::sterilizeList msg {
 	return $ret
 }
 
-## ::server::handle::user chan as channel
+#//////////////////////////////////////////////////////////////////////
+# ::server::handle::user chan as channel
 #
 # forward the user command appropriately.
-#
+#//////////////////////////////////////////////////////////////////////
 proc ::server::handle::user chan {
   set msg [gets $chan]
   set name [::see::from $msg]
@@ -82,16 +79,12 @@ proc ::server::handle::user chan {
 	puts done
 }
 
-
-################################################################################################################################################################
-# Accept #########################################################################################################################################################
-################################################################################################################################################################
-
-
-## ::server::accept chan as channel addr as word port as word
+# Accept #
+#//////////////////////////////////////////////////////////////////////
+# ::server::accept chan as channel addr as word port as word
 #
 # meet new connections and record their details
-#
+#//////////////////////////////////////////////////////////////////////
 proc ::server::accept {chan addr port} {
   set msg [gets $chan]
   set name [::see::from $msg]
@@ -103,10 +96,11 @@ proc ::server::accept {chan addr port} {
   }
 }
 
-## ::server::handle::user chan as channel
+#//////////////////////////////////////////////////////////////////////
+# ::server::handle::user chan as channel
 #
 # record details, respond, set up fileevent for each channgel.
-#
+#//////////////////////////////////////////////////////////////////////
 proc ::server::greet::client {chan name handle {message ""}} {
 	fconfigure $chan -buffering line
 	puts $chan [list "from" "server" "to" $name "message" "you are $name your channel is $chan"]
@@ -114,12 +108,7 @@ proc ::server::greet::client {chan name handle {message ""}} {
 	fileevent $chan readable [list ::server::handle::[set handle] $chan]
 }
 
-
-################################################################################################################################################################
-# run #########################################################################################################################################################
-################################################################################################################################################################
-
-
+# run #
 ::server::global
 socket -server ::server::accept 9900
 vwait forever
