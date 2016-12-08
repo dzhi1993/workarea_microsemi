@@ -4,7 +4,7 @@ namespace eval user {} {
 
 	puts "------------------- User port -------------------"
 
-	namespace export SendMessage CheckMessage connect disconnect
+	namespace export SendMessage CheckMessage connect disconnect SendMessageNoReply
 	# Client #
 	variable chanInit "Non-connection"
 	variable ::chan $chanInit
@@ -29,6 +29,7 @@ namespace eval user {} {
 
 	# TODO: User1 sends msg to client port and waiting reply from client
 	proc SendMessage {serverAddress message} {
+		variable ::chan;
 		if {$::chan eq "Non-connection"} {
 			set ::chan [connect $serverAddress];
 		}
@@ -41,6 +42,7 @@ namespace eval user {} {
 		while {1} {
 			set returnMessage [gets $::chan];
 			if {$returnMessage ne ""} {
+				puts $returnMessage;
 				set reply "Pass";
 				break;
 			} elseif {$LoopCounter == 0} {
@@ -54,9 +56,23 @@ namespace eval user {} {
 		return $reply;
 	}
 	
+	#/////////////////////////////////////////////////////////////////////////////
+	#send message without reply
+	#/////////////////////////////////////////////////////////////////////////////
+	proc SendMessageNoReply {serverAddress message} {
+		variable ::chan;
+		if {$::chan eq "Non-connection"} {
+			set ::chan [connect $serverAddress];
+		}
+		#set sendMessage "$serverAddress $message"; 
+		puts $::chan "$serverAddress $message";
+		flush $::chan;
+	}
+	
 	# TODO: User1 sends polling message to client, this polling message will be further 
 	# send to server and User2. Then User1 waiting reply from User2.
 	proc CheckMessage {serverAddress message} {
+	  #TODO: ignore message comfirmation from server. 
 		#puts $::chan "$serverAddress $message";
 		#flush $::chan;
 		set returnMessage "";

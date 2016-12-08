@@ -34,9 +34,9 @@ namespace eval server {
 	#//////////////////////////////////////////////////////////////////////
 	# Expose to outside namespace for other porgram to get message.
 	#//////////////////////////////////////////////////////////////////////
-	proc getMessage {msg} {
-		return $msg;
-	}
+	#proc getMessage {msg} {
+	#	return $msg;
+	#}
 	
 	#//////////////////////////////////////////////////////////////////////
 	# handle::user chan as channel
@@ -45,14 +45,17 @@ namespace eval server {
 	#//////////////////////////////////////////////////////////////////////
 	proc handleUser {chan} {
 		set msg [gets $chan];
-		puts "\[[lindex $msg 0]]: [lindex $msg 1]";
-		#TODO: commmand is a function from namespace support	
-		getMessage [lindex $msg 1];
+		puts "\[[lindex $msg 0]]: [lreplace $msg 0 0]";	
+		#TODO: judge the message information, only the message from User1 can be sent to User2. (Done)
+		#TODO: the message list can be grown (Done)
 		
-		#puts "SENDING: $chan message received"
+		#the funciton getMessage is a sample proc, you can replace it with your function which is User2's interface
+		set response [getMessage [lreplace $msg 0 0]];
+		
 		#puts $chan "Here, you can puts the simulation results so that it can be sent back to client port."
-		puts $chan "server received message, What would you like to say?"
-		puts done
+		puts $chan [list {[server]: Message received} $response];
+		puts Done
+		#accept $chan
 	}
 
 	# Accept #
@@ -71,7 +74,7 @@ namespace eval server {
 		puts "\[$PcName]: [lindex $msg 1]";
 		#[::server::greet::client $chan $name user]
 		#if {$name eq "user"} {
-		greetClient $chan $PcName
+		greetClient $chan $PcName [lindex $msg 1];
 		#} else {
 		#	::server::greet::client $chan $name client $msg
 		#}
@@ -92,9 +95,10 @@ namespace eval server {
 	# (5) Additionally, stdin and stdout are initially set to line, and stderr is set to none.
 	#
 	#///////////////////////////////////////////////////////////////////////////////////////////////
-	proc greetClient {chan name} {
+	proc greetClient {chan name msg} {
 		fconfigure $chan -buffering line;
-		puts $chan "Message received";
+		after 2000
+		puts $chan "Message: \"$msg\" received";
 		lappend clients $name $chan;
 		# puts $::clients      #ex. user sock240
 		#fileevent - execute a script or function when a channel becomes readable or writable
